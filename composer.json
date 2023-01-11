@@ -1,0 +1,51 @@
+{
+    "name": "anwardote/export-import-wp-laravel",
+    "description": "Wordpress data exporting and importing to Laravel App.",
+    "keywords": ["oauth", "laravel"],
+    "license": "MIT",
+    "homepage": "https://anwar.com",
+    "support": {
+        "issues": "https://github.com/anwardote/export-import-wp-laravel/issues",
+        "source": "https://github.com/anwardote/export-import-wp-laravel"
+    },
+    "authors": [
+        {
+            "name": "Anwar",
+            "email": "me@anwar.dev"
+        }
+    ],
+    "require": {
+        "php": "^8.0|^8.2",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^6.0|^7.0",
+        "illuminate/contracts": "^6.0|^7.0|^8.0|^9.0",
+        "illuminate/http": "^6.0|^7.0|^8.0|^9.0",
+        "illuminate/support": "^6.0|^7.0|^8.0|^9.0"
+    },
+    "require-dev": {
+        "mockery/mockery": "^1.0",
+        "orchestra/testbench": "^4.0|^5.0|^6.0|^7.0",
+        "phpunit/phpunit": "^8.0|^9.3",
+        "spatie/laravel-ray": "^1.29"
+    },
+    "autoload": {
+        "psr-4": {
+            "Anwardote\\ExportImportWpLaravel\\": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.x-dev"
+        },
+        "laravel": {
+            "providers": [
+                "Anwardote\\ExportImportWpLaravel\\ExportImportWpLaravelServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
