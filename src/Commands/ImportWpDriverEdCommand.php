@@ -21,7 +21,8 @@ class ImportWpDriverEdCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Command to import ED Drivers Dates into laravel.';
+
 
     /**
      * Execute the console command.

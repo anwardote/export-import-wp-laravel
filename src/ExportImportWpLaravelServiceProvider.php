@@ -3,6 +3,7 @@
 namespace Anwardote\ExportImportWpLaravel;
 
 use Anwardote\ExportImportWpLaravel\Commands\ImportCoureCommand;
+use Anwardote\ExportImportWpLaravel\Commands\ImportWpCouponCommand;
 use Anwardote\ExportImportWpLaravel\Commands\ImportWpReadyCommand;
 use Anwardote\ExportImportWpLaravel\Commands\ImportWpRegisterCommand;
 use Anwardote\ExportImportWpLaravel\Commands\ImportWpUserCommand;
@@ -74,7 +75,8 @@ class ExportImportWpLaravelServiceProvider extends ServiceProvider
             ImportWpUserCommand::class,
             ImportWpRegisterCommand::class,
             ImportWpDriverEdCommand::class,
-            ImportWpLessonsCommand::class
+            ImportWpLessonsCommand::class,
+            ImportWpCouponCommand::class
         ]);
     }
 

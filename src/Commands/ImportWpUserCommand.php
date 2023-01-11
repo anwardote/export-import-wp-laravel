@@ -3,11 +3,13 @@
 namespace Anwardote\ExportImportWpLaravel\Commands;
 
 use Anwardote\ExportImportWpLaravel\Models\WpUser;
+use Anwardote\ExportImportWpLaravel\Models\WpUsermeta;
 use Axilweb\Acl\App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ImportWpUserCommand extends Command
 {
@@ -32,13 +34,35 @@ class ImportWpUserCommand extends Command
      */
     public function handle()
     {
+        if ($this->ask('Download User Avatars?(y/n)', 'n') == 'y') {
+            $avatarUsers = WpUsermeta::query()->where('meta_key', 'nwds_avatar')->get();
+            foreach ($avatarUsers as $avatarUser) {
+                if ($avatarUser->meta_key) {
+                    $avatar = unserialize($avatarUser->meta_value);
+                    if (isset($avatar['url'])) {
+                        $avatarUrl = $avatar['url'];
+                        $filename = basename($avatarUrl);
+                        $extention = explode('.', $filename);
+                        $extention = end($extention);
+                        $fileContent = file_get_contents($avatarUrl);
+                        $this->info('Downloading .. :'.$avatarUrl);
+                        if ($fileContent) {
+                            Storage::disk('public')->put("/avatars/".$avatarUser->user_id.'.jpg', $fileContent);
+                        }
+                    }
+                }
+            }
+        }
+
         if ($this->ask('Will truncate users table?', 'y') == 'y') {
             User::query()->truncate();
             DB::table('model_has_roles')->truncate();
         }
 
         if ($this->ask('Import All Users from wp_users?', 'y') == 'y') {
-            $wpUsers = WpUser::query();
+            $wpUsers = WpUser::query()
+//                ->limit(100)
+            ;
             foreach ($wpUsers->cursor() as $wpUser) {
                 $userData = $this->getUserProfile($wpUser);
 
@@ -80,6 +104,7 @@ class ImportWpUserCommand extends Command
                 'nwds_education',
                 'nwds_designation',
                 'wp_9t854h_capabilities',
+                'nwds_avatar',
             ])->get()
         );
 
@@ -88,6 +113,11 @@ class ImportWpUserCommand extends Command
         $dob = $userMeta->dob ?? null;
         $role = (array)unserialize($userMeta->wp_9t854h_capabilities);
         $role = array_keys($role);
+
+        $avatar = null;
+        if($userMeta->nwds_avatar ?? ''){
+            $avatar = "avatars/{$user->ID}.jpg";
+        }
 
         $userType = 3;
         if (in_array('administrator', $role)) {
@@ -122,6 +152,7 @@ class ImportWpUserCommand extends Command
             'is_active' => 1,
             'type' => $userType,
             'role' => $role,
+            'avatar' => $avatar,
         ];
     }
 

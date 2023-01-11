@@ -30,36 +30,31 @@ class ImportWpLessonsCommand extends Command
      */
     public function handle()
     {
-        $lessons = WpRegister::query()
-            ->select([
-                'course_slot', 'course_type_id',
-                'new_course_type_id', 'course_slot_num',
-                'driving_program_id'
-            ])->where('user_id', '>', 0)
-            ->distinct('course_slot')
-            ->get();
-
         if ($this->ask('Will truncate lessons table?', 'y') == 'y') {
             Lesson::query()->truncate();
         }
 
-        ray()->clearAll();
         if ($this->ask('Import lessons table?', 'y') == 'y') {
+            $lessons = WpRegister::query()
+                ->select([
+                    'course_slot',
+                    'course_type_id',
+                    'new_course_type_id',
+                    'course_slot_num',
+                    'driving_program_id'
+                ])->where('user_id', '>', 0)
+                ->distinct('course_slot')
+                ->get();
 
             WpRegister::query()->update(['driving_lesson_id' => null]);
 
-            $wplessons = collect($lessons)->reduce(function ($results, $item){
+            $wplessons = collect($lessons)->reduce(function ($results, $item) {
                 $courseSlot = explode('-', $item->course_slot);
                 $name = trim($courseSlot[0]);
                 $results[$name] = $item;
 
                 return $results;
-            },[]);
-//
-//            dd(WpRegister::query()
-//                ->where('course_slot','REGEXP', '2 Hr%')
-//                ->get());
-//            dd(array_keys($wplessons));
+            }, []);
 
             $key = 0;
             foreach ($wplessons as $lesson) {
@@ -79,17 +74,15 @@ class ImportWpLessonsCommand extends Command
                         'no_of_lessons' => $lesson->course_slot_num,
                         'price' => $price,
                     ];
-                    if(Lesson::query()->insert($lessonData)){
+                    if (Lesson::query()->insert($lessonData)) {
                         WpRegister::query()
-                            ->where('course_slot','REGEXP', $name)
+                            ->where('course_slot', 'REGEXP', $name)
                             ->update(['driving_lesson_id' => $id]);
                     }
                 } catch (\Exception $exception) {
-                    ray($lessonData);
-                    dd($exception->getMessage());
+                    $this->warn($exception->getMessage());
+                    dd($lessonData);
                 }
-
-
             }
         }
     }

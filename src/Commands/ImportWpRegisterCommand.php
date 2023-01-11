@@ -5,6 +5,7 @@ namespace Anwardote\ExportImportWpLaravel\Commands;
 use Anwardote\ExportImportWpLaravel\Models\WpRegister;
 use Anwardote\ExportImportWpLaravel\Models\WpRegisterPiv;
 use Anwardote\ExportImportWpLaravel\Models\WpUser;
+use Anwardote\ExportImportWpLaravel\Models\WpUsermeta;
 use Axilweb\Acl\App\Models\User;
 use Axilweb\BackendPortal\App\Models\Driving\Appointment;
 use Axilweb\BackendPortal\App\Models\Driving\AppointmentTime;
@@ -14,6 +15,8 @@ use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ImportWpRegisterCommand extends Command
@@ -39,12 +42,28 @@ class ImportWpRegisterCommand extends Command
      */
     public function handle()
     {
-//        $users = User::query()->whereHas('roles', function ($query) {
-//            $query->where('name', 'subscriber');
-//        })->update(['type' => 3]);
-//        dd($users->count());
-//
-//        dd('wait');
+        if ($this->ask('Download ID Cards?(y/n)', 'n') == 'y') {
+            $regiCards = Http::get('https://northwestdrivingschool.com/wp-json/private/v1/id-cards');
+            if ($regiCards->ok()) {
+                $cards = $regiCards->json();
+                if ($cards) {
+                    foreach ($cards as $id => $card) {
+                        if (isset($card['url']) && !empty($card['url'])) {
+                            $cardUrl = $card['url'];
+                            try {
+                                $fileContent = file_get_contents($cardUrl);
+                                $this->info('Downloading .. :'.$cardUrl);
+                                if ($fileContent) {
+                                    Storage::disk('public')->put("/id-cards/".$id.'.jpg', $fileContent);
+                                }
+                            } catch (\Exception $exception) {
+                                $this->warn('failed .. :'.$cardUrl);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         if ($this->ask('Will truncate appointments old data?', 'y') == 'y') {
             Appointment::query()->truncate();
@@ -88,8 +107,8 @@ class ImportWpRegisterCommand extends Command
 
                 $this->info("Running: - ".$wpRegister->id);
             } catch (\Exception $exception) {
-                dd($exception->getMessage());
-                ray($apointmentData);
+                $this->warn($exception->getMessage());
+                dd($apointmentData);
             }
         }
 
@@ -104,6 +123,43 @@ class ImportWpRegisterCommand extends Command
             ? null
             : Carbon::parse($regiData->permit_expired)->format('Y-m-d');
 
+        $idCardFile = null;
+        if ($regiData->attachment_id > 0) {
+            $idCardFile = "id-cards/{$regiData->attachment_id}.jpg";
+        }
+
+        $couponCode = null;
+        $discountAmount = 0;
+        $giftCode = null;
+        $giftAmount = 0;
+
+        if ($regiData->gift_amount > 0) {
+            $giftAmount = $regiData->gift_amount;
+        }
+
+        $registrationString = unserialize($regiData->registration_string);
+        $lastFourDigitCard = '';
+        if (is_array($registrationString)) {
+            // last 4 digits card numbers
+            $cardNumString = $registrationString['card_num'] ?? '';
+            if (strlen($cardNumString) > 4) {
+                $lastFourDigitCard = Str::substr($cardNumString, -4, 4);
+            }
+
+            $couponCodeString = $registrationString['coupon_code'] ?? '';
+            $codeTypeString = $registrationString['code_type'] ?? '';
+
+            if ($giftAmount == 0 && $couponCodeString) {
+                if (!$codeTypeString || $codeTypeString == 'coupon') {
+                    $couponCode = $couponCodeString;
+                }
+            }
+
+            if ($giftAmount > 0) {
+                $giftCode = $couponCodeString;
+            }
+        }
+
         $regiData = [
             'id' => $regiData->uuid,
             'student_id' => $regiData->user_uuid,
@@ -114,23 +170,23 @@ class ImportWpRegisterCommand extends Command
             'no_of_lessons' => $regiData->course_slot_num,
             'actual_price' => $actualPrice,
             'driving_coupon_id' => null,
-            'coupon_code' => null,
-            'gift_code' => null,
-            'discount_amount' => $actualPrice - $regiData->total_amount,
+            'coupon_code' => trim($couponCode),
+            'discount_amount' => $discountAmount,
+            'gift_code' => trim($giftCode),
+            'gift_amount' => $giftAmount,
             'paid_amount' => $regiData->total_amount,
             'permit_no' => $regiData->permit_number,
             'permit_exp_date' => $permitDate,
             'payment_status' => $regiData->payment_status == 'success' ? 1 : 3,
             'status' => $regiData->status,
-            'card_number' => $regiData->last_four_digits_card,
+            'last_four_digit_card' => $lastFourDigitCard,
             'transaction_id' => null,
-            'id_card' => $regiData->attachment_id,
+            'id_card_file' => $idCardFile,
             'created_at' => $regiData->created_at,
             'updated_at' => $regiData->updated_at,
         ];
 
         return $regiData;
     }
-
 
 }
