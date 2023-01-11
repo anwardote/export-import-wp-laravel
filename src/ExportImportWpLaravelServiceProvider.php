@@ -22,9 +22,6 @@ class ExportImportWpLaravelServiceProvider extends ServiceProvider
      */
     public function register()
     {
-//        $this->app->register(CrewlixTenantEventServiceProvider::class);
-//        $this->app->register(CrewlixTenantScheduleServiceProvider::class);
-
         // mergeConfigFrom
         $this->axilweb_mergeConfigFrom();
     }
