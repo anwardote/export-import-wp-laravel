@@ -4,10 +4,12 @@ namespace Anwardote\ExportImportWpLaravel\Commands;
 
 use Anwardote\ExportImportWpLaravel\Models\WpCoupon;
 use Anwardote\ExportImportWpLaravel\Models\WpRegister;
+use Anwardote\ExportImportWpLaravel\Services\ModelService;
 use Axilweb\BackendPortal\App\Models\Driving\Coupon;
 use Axilweb\BackendPortal\App\Models\Driving\DriverEdClassDate;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class ImportWpCouponCommand extends Command
 {
@@ -44,7 +46,7 @@ class ImportWpCouponCommand extends Command
                 'activated_at' => CarbonImmutable::parse($coupon->activated_date)->format('Y-m-d H:i:s'),
                 'expired_at' => CarbonImmutable::parse($coupon->expired_date)->format('Y-m-d H:i:s'),
                 'is_id_card_required' => $coupon->id_card == 'YES',
-                'applicable_for' => $coupon->id,
+//                'applicable_for' => $coupon->id,
                 'student_of_school' => $coupon->id,
                 'is_enabled' => $coupon->status == 'active',
             ];
