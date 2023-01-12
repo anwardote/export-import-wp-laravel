@@ -195,8 +195,8 @@ class ImportWpReadyCommand extends Command
         if ($this->ask('Will map regi_time to regi_time24', 'y') == 'y') {
             $times = DB::connection('wp')
                 ->table('nwds_registration_pivot')
-//                ->whereNotIn('r_time', ['9:00 AM - 2:00 PM', '9:00 AM - 5:00 PM'])
-//                ->groupBy('r_time')
+                ->join('nwds_registration','nwds_registration_pivot.r_uuid','nwds_registration.uuid')
+                ->where('nwds_registration.user_id','>',0)
                 ->get();
 
             foreach ($times as $time) {
