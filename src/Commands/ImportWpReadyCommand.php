@@ -6,7 +6,6 @@ use Anwardote\ExportImportWpLaravel\Models\WpRegister;
 use Anwardote\ExportImportWpLaravel\Models\WpUser;
 use Anwardote\ExportImportWpLaravel\Models\WpUsermeta;
 use Anwardote\ExportImportWpLaravel\Services\ExportRoleService;
-use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;

@@ -4,17 +4,11 @@ namespace Anwardote\ExportImportWpLaravel\Commands;
 
 use Anwardote\ExportImportWpLaravel\Models\WpRegister;
 use Anwardote\ExportImportWpLaravel\Models\WpRegisterPiv;
-use Anwardote\ExportImportWpLaravel\Models\WpUser;
-use Anwardote\ExportImportWpLaravel\Models\WpUsermeta;
-use Axilweb\Acl\App\Models\User;
 use Axilweb\BackendPortal\App\Models\Driving\Appointment;
 use Axilweb\BackendPortal\App\Models\Driving\AppointmentTime;
-use Axilweb\BackendPortal\App\Models\Driving\Lesson;
 use Axilweb\BackendPortal\App\Models\Driving\Schedule;
 use Carbon\Carbon;
-use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;

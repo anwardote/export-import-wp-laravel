@@ -6,7 +6,6 @@ use Anwardote\ExportImportWpLaravel\Models\WpRegister;
 use Axilweb\BackendPortal\App\Models\Driving\CourseType;
 use Axilweb\BackendPortal\App\Models\Driving\Program;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class ImportCoureCommand extends Command
 {

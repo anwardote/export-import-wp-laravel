@@ -3,13 +3,9 @@
 namespace Anwardote\ExportImportWpLaravel\Commands;
 
 use Anwardote\ExportImportWpLaravel\Models\WpCoupon;
-use Anwardote\ExportImportWpLaravel\Models\WpRegister;
-use Anwardote\ExportImportWpLaravel\Services\ModelService;
 use Axilweb\BackendPortal\App\Models\Driving\Coupon;
-use Axilweb\BackendPortal\App\Models\Driving\DriverEdClassDate;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class ImportWpCouponCommand extends Command
 {
@@ -37,6 +33,15 @@ class ImportWpCouponCommand extends Command
         $coupons = WpCoupon::query()->get();
         $couponData = [];
         foreach ($coupons as $coupon) {
+            $applicable = [];
+            if($coupon->vendor == 'any'){
+                $applicable = ['ncc', 'nwds'];
+            }elseif($coupon->vendor == 'nwcc'){
+                $applicable = ['ncc'];
+            }elseif($coupon->vendor == 'nwds'){
+                $applicable = ['nwds'];
+            }
+
             $couponData[] = [
                 'id' => $coupon->id,
                 'code' => $coupon->code,
@@ -47,7 +52,7 @@ class ImportWpCouponCommand extends Command
                 'expired_at' => CarbonImmutable::parse($coupon->expired_date)->format('Y-m-d H:i:s'),
                 'is_id_card_required' => $coupon->id_card == 'YES',
 //                'applicable_for' => $coupon->id,
-                'student_of_school' => $coupon->id,
+                'applicable_for' => json_encode($applicable),
                 'is_enabled' => $coupon->status == 'active',
             ];
         }
