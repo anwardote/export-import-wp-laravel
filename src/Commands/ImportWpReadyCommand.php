@@ -35,10 +35,11 @@ class ImportWpReadyCommand extends Command
     public function handle()
     {
         ray()->clearAll();
+        WpUser::query()->update(['user_registered' => now()]);
 //        ID: 8  maybe instructor
 //        ID : 3286  maybe student
 //        They are not assigned any role.. thats why count is generating wrong counter
-        DB::connection('wp')->statement("ALTER TABLE wp_9t854h_users CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL");
+//        \DB::connection('wp')->statement("ALTER TABLE wp_9t854h_users CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL");
         WpUsermeta::query()->updateOrCreate(
             ['user_id' => 8, 'meta_key' => 'wp_9t854h_capabilities'],
             ['meta_value' => ExportRoleService::instructorRole()]
