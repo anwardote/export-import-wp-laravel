@@ -146,12 +146,19 @@ class ImportWpRegisterCommand extends Command
             if ($giftAmount == 0 && $couponCodeString) {
                 if (!$codeTypeString || $codeTypeString == 'coupon') {
                     $couponCode = $couponCodeString;
+                    $discountAmount = $registrationString['discount_amount'] ?? 0;
+                    $discountAmount = floatval($discountAmount);
                 }
             }
 
             if ($giftAmount > 0) {
                 $giftCode = $couponCodeString;
             }
+        }
+
+
+        if($couponCode && !$discountAmount){
+            $discountAmount = $actualPrice - $regiData->total_amount;
         }
 
         $regiData = [
