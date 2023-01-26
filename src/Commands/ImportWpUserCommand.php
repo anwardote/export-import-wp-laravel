@@ -119,13 +119,6 @@ class ImportWpUserCommand extends Command
             $avatar = "avatars/{$user->ID}.jpg";
         }
 
-        $userType = 3;
-        if (in_array('administrator', $role)) {
-            $userType = 1;
-        } elseif (in_array('instructor', $role)) {
-            $userType = 2;
-        }
-
         return [
             'id' => $user->app_uuid,
             'first_name' => empty($firstName) ? $user->user_login : $firstName,
@@ -150,7 +143,6 @@ class ImportWpUserCommand extends Command
             'bio' => $userMeta->nwds_bio ?? '',
             'is_invisible' => $instructorShow != 'NO',
             'is_active' => 1,
-            'type' => $userType,
             'role' => $role,
             'avatar' => $avatar,
         ];
